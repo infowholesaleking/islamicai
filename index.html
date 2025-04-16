@@ -1,0 +1,193 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row =>
+                    row.some(cell => cell !== '' && cell !== null && cell !== undefined)
+                );
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebKart - Religious Content Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header with glass effect -->
+    <header class="glass-effect py-4 px-6 sticky top-0 z-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-blue-900">
+                <span class="logo">
+                    <span class="logo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    ISLAMIC-AI
+                </span>
+                <span class="text-gray-600 font-normal ml-2"></span>
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main chat area -->
+    <main class="flex-1 container mx-auto px-4 py-6 flex flex-col">
+        <!-- Centered AI message -->
+        <div class="mb-8 text-center">
+            <div class="ai-message-box rounded-xl shadow-lg p-6 inline-block">
+                <p class="text-gray-800 font-bold text-lg">*Assalamualaikum wa Rahmatullahi wa Barakatuhu*</p>
+                <p class="text-gray-600 mt-2">"Please select your query to receive in-depth <br> Islamic knowledge, derived from Qur'an and Sunnah."</p>
+            </div>
+        </div>
+
+        <!-- Generated code area -->
+        <div class="flex-1 flex flex-col mb-4">
+            <div class="bg-gray-900 rounded-xl shadow-xl overflow-hidden flex-1 flex flex-col relative">
+                <div class="bg-gray-800 px-4 py-2 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex space-x-2 mr-4">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="text-gray-300 text-sm">Islamic-AI</div>
+                    </div>
+                    <button id="copy-btn" class="text-gray-300 hover:text-white transition-colors text-sm">
+                        <i class="far fa-copy mr-1"></i> Copy Code
+                    </button>
+                </div>
+                <div id="code-output" class="p-4 text-green-400 font-mono text-sm overflow-auto flex-1 whitespace-pre-line">
+                    <!-- Content will appear here with typing animation -->
+                </div>
+            </div>
+            
+            <!-- Download button space (hidden initially) -->
+            <div id="download-container" class="mt-4 hidden flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i> Your content is ready!
+                </div>
+                <div class="flex space-x-2">
+                    <button id="download-btn" class="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all transform hover:scale-105">
+                        <i class="fas fa-download mr-2"></i> Download Content
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SELECT SOURCE -->
+        <div id="source-section" class="dropdown-section" style="display: block;">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">"Just select and receive your answer effortlessly."</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- SELECT SOURCE -->
+                <div class="dropdown-container">
+                    <label for="source" class="dropdown-label">Select Source</label>
+                    <select id="source" class="dropdown-select">
+                        <option value="quran">Qur'an</option>
+                        <option value="hadith">Hadith</option>
+                    </select>
+                </div>
+                
+                <!-- Topic Dropdown -->
+                <div class="dropdown-container">
+                    <label for="topic" class="dropdown-label">Select Topic</label>
+                    <select id="topic" class="dropdown-select">
+                        <option value="">Select a topic</option>
+                    </select>
+                </div>
+                
+                <!-- Sub-Topic Dropdown -->
+                <div class="dropdown-container">
+                    <label for="subtopic" class="dropdown-label">Select Sub-Topic</label>
+                    <select id="subtopic" class="dropdown-select">
+                        <option value="">Select a sub-topic</option>
+                    </select>
+                </div>
+                
+                <!-- Language Dropdown -->
+                <div class="dropdown-container">
+                    <label for="language" class="dropdown-label">Select Language</label>
+                    <select id="language" class="dropdown-select">
+                        <option value="">Select a language</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate button container -->
+        <div class="generate-btn-container">
+            <button id="generate-btn" class="religion-btn">
+                <i class="fas fa-praying-hands mr-2"></i> Generate Content
+            </button>
+        </div>
+    </main>
+
+    <!-- Page footer -->
+    <footer class="footer-gradient text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">
+                        <span class="logo">
+                            <span class="logo-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            WebKart
+                        </span>
+                    </h3>
+                    <p class="text-white text-opacity-80">Create detailed religious content with our AI-powered generator.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-white text-opacity-80 hover:text-opacity-100 transition">Content Gallery</a></li>
+                        <li><a href="#" class="text-white text-opacity-80 hover:text-opacity-100 transition">API Documentation</a></li>
+                        <li><a href="#" class="text-white text-opacity-80 hover:text-opacity-100 transition">Premium Features</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Connect</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-white text-opacity-80 hover:text-opacity-100 transition text-xl"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white text-opacity-80 hover:text-opacity-100 transition text-xl"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-white text-opacity-80 hover:text-opacity-100 transition text-xl"><i class="fab fa-discord"></i></a>
+                        <a href="#" class="text-white text-opacity-80 hover:text-opacity-100 transition text-xl"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white border-opacity-20 mt-8 pt-6 text-center text-white text-opacity-70">
+                <p>© 2023 WebKart. All rights reserved. | <a href="#" class="hover:text-white">Privacy Policy</a> | <a href="#" class="hover:text-white">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
